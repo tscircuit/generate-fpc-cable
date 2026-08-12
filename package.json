@@ -1,0 +1,66 @@
+{
+  "name": "@tscircuit/generate-fpc-cable",
+  "version": "0.0.1",
+  "description": "Generate routed, textured FPC ribbon cable manifold geometry and GLTF/GLB assets",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup-node lib/index.ts --format esm --dts --sourcemap",
+    "check": "bun run format:check && bun run typecheck && bun test",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "prepack": "bun run build",
+    "snapshot:update": "BUN_UPDATE_SNAPSHOTS=1 bun test tests/visual",
+    "test": "bun test",
+    "test:node-import": "bun run build && node --input-type=module -e \"await import('./dist/index.js')\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tscircuit/generate-fpc-cable.git"
+  },
+  "homepage": "https://github.com/tscircuit/generate-fpc-cable#readme",
+  "bugs": {
+    "url": "https://github.com/tscircuit/generate-fpc-cable/issues"
+  },
+  "keywords": [
+    "fpc",
+    "ribbon-cable",
+    "gltf",
+    "glb",
+    "manifold",
+    "tscircuit"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "fast-png": "^8.0.0",
+    "manifold-3d": "3.5.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.8",
+    "@tscircuit/alphabet": "^0.0.25",
+    "@tscircuit/image-utils": "^0.0.9",
+    "@types/bun": "latest",
+    "gltf-validator": "2.0.0-dev.3.10",
+    "poppygl": "^0.0.27",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
