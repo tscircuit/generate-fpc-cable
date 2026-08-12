@@ -45,15 +45,28 @@ export const createFpcCableManifolds = async (
 ): Promise<FpcCableManifoldModel> => {
   const geometry = createFpcCableGeometry(definition, options)
   const module = await getManifoldModule()
-  const polyimide = toManifold(
+  const substrate = toManifold(
     module,
-    geometry.polyimide.compact,
-    "polyimide cover",
+    geometry.substrate.compact,
+    "polyimide substrate",
+  )
+  const coverlay = toManifold(
+    module,
+    geometry.coverlay.compact,
+    "polyimide coverlay",
   )
   const conductors: Manifold[] = []
+  let polyimide: Manifold | undefined
   let combined: Manifold | undefined
 
   try {
+    polyimide = module.Manifold.union([substrate, coverlay])
+    const polyimideStatus = polyimide.status()
+    if (polyimide.isEmpty() || polyimideStatus !== "NoError") {
+      throw new Error(
+        `manifold-3d could not construct the polyimide layers: ${polyimideStatus}`,
+      )
+    }
     for (const [index, conductor] of geometry.conductors.entries()) {
       conductors.push(
         toManifold(module, conductor.compact, `conductor ${index + 1}`),
@@ -68,10 +81,15 @@ export const createFpcCableManifolds = async (
     }
   } catch (error) {
     combined?.delete()
+    polyimide?.delete()
     for (const conductor of conductors) conductor.delete()
-    polyimide.delete()
+    coverlay.delete()
+    substrate.delete()
     throw error
   }
+
+  coverlay.delete()
+  substrate.delete()
 
   let disposed = false
   return {

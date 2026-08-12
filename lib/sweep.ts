@@ -24,8 +24,12 @@ const ringCorners = (
   halfWidth: number,
   halfThickness: number,
   acrossOffset: number,
+  normalOffset: number,
 ): [Point3D, Point3D, Point3D, Point3D] => {
-  const center = add(frame.center, scale(frame.across, acrossOffset))
+  const center = add(
+    add(frame.center, scale(frame.across, acrossOffset)),
+    scale(frame.normal, normalOffset),
+  )
   const across = scale(frame.across, halfWidth)
   const normal = scale(frame.normal, halfThickness)
   return [
@@ -46,6 +50,7 @@ const createCompactMesh = (
   halfWidth: number,
   halfThickness: number,
   acrossOffset: number,
+  normalOffset: number,
 ): CompactTriangleMeshData => {
   const positions: number[] = []
   const indices: number[] = []
@@ -55,6 +60,7 @@ const createCompactMesh = (
       halfWidth,
       halfThickness,
       acrossOffset,
+      normalOffset,
     )) {
       pushPoint(positions, corner)
     }
@@ -93,6 +99,7 @@ const createRenderMesh = (
   halfWidth: number,
   halfThickness: number,
   acrossOffset: number,
+  normalOffset: number,
   textureRepeatLength: number,
 ): TriangleMeshData => {
   const positions: number[] = []
@@ -103,7 +110,13 @@ const createRenderMesh = (
   for (let edge = 0; edge < 4; edge += 1) {
     const edgeStart = positions.length / 3
     for (const frame of frames) {
-      const corners = ringCorners(frame, halfWidth, halfThickness, acrossOffset)
+      const corners = ringCorners(
+        frame,
+        halfWidth,
+        halfThickness,
+        acrossOffset,
+        normalOffset,
+      )
       for (const [u, cornerIndex] of [
         [0, edge],
         [1, (edge + 1) % 4],
@@ -123,7 +136,13 @@ const createRenderMesh = (
   }
 
   const addCap = (frame: CableFrame, isStart: boolean): void => {
-    const corners = ringCorners(frame, halfWidth, halfThickness, acrossOffset)
+    const corners = ringCorners(
+      frame,
+      halfWidth,
+      halfThickness,
+      acrossOffset,
+      normalOffset,
+    )
     const capStart = positions.length / 3
     const normal = scale(frame.tangent, isStart ? -1 : 1)
     const capUvs: Array<readonly [number, number]> = [
@@ -161,14 +180,22 @@ export const createSweptSolid = (
   width: number,
   thickness: number,
   acrossOffset: number,
+  normalOffset: number,
   textureRepeatLength: number,
 ): SweptSolidGeometry => ({
-  compact: createCompactMesh(frames, width / 2, thickness / 2, acrossOffset),
+  compact: createCompactMesh(
+    frames,
+    width / 2,
+    thickness / 2,
+    acrossOffset,
+    normalOffset,
+  ),
   render: createRenderMesh(
     frames,
     width / 2,
     thickness / 2,
     acrossOffset,
+    normalOffset,
     textureRepeatLength,
   ),
 })

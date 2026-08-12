@@ -31,7 +31,17 @@ describe("ribbon cable geometry", () => {
     }
     expect(geometry.conductors).toHaveLength(6)
     expect(geometry.dimensions.width).toBeCloseTo(6.22)
-    expect(geometry.polyimide.compact.indices.length).toBeGreaterThan(100)
+    expect(geometry.substrate.compact.indices.length).toBeGreaterThan(100)
+    expect(geometry.coverlay.compact.indices.length).toBeGreaterThan(100)
+
+    // Four substrate vertices at every path frame ensures that the exposed
+    // copper pads remain supported by an uncut, full-width backing at both ends.
+    expect(geometry.substrate.compact.positions.length / 3).toBe(
+      geometry.path.length * 4,
+    )
+    expect(geometry.coverlay.compact.positions.length).toBeLessThan(
+      geometry.substrate.compact.positions.length,
+    )
   })
 
   test("rejects invalid cable definitions", () => {

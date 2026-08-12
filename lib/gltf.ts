@@ -194,7 +194,8 @@ const buildDocument = (
     nodes.push({ name, mesh: meshIndex })
   }
 
-  addMesh("Polyimide cover", geometry.polyimide.render, 0)
+  addMesh("Polyimide substrate", geometry.substrate.render, 0)
+  addMesh("Polyimide coverlay", geometry.coverlay.render, 0)
   for (const [index, conductor] of geometry.conductors.entries()) {
     addMesh(`Copper conductor ${index + 1}`, conductor.render, 1)
   }

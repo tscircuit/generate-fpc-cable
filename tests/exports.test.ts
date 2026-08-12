@@ -37,7 +37,9 @@ describe("FPC cable exports", () => {
     expect(
       gltf.materials[1].pbrMetallicRoughness.metallicFactor,
     ).toBeGreaterThan(0.9)
-    expect(gltf.nodes).toHaveLength(definition.wireCount + 1)
+    expect(gltf.nodes).toHaveLength(definition.wireCount + 2)
+    expect(gltf.nodes[0].name).toBe("Polyimide substrate")
+    expect(gltf.nodes[1].name).toBe("Polyimide coverlay")
   })
 
   test("creates valid manifold-3d solids", async () => {

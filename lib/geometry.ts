@@ -15,7 +15,10 @@ import type {
 
 export interface FpcCableGeometry {
   path: Point3D[]
-  polyimide: SweptSolidGeometry
+  /** Full-length flexible backing beneath the conductors and exposed pads. */
+  substrate: SweptSolidGeometry
+  /** Top insulation retracted from both ends to expose the contact pads. */
+  coverlay: SweptSolidGeometry
   conductors: SweptSolidGeometry[]
   dimensions: FpcCableDimensions
   options: ResolvedFpcCableOptions
@@ -32,22 +35,44 @@ export const createFpcCableGeometry = (
   )
   const frames = createCableFrames(path, resolved.options.up)
   const centerlineLength = frames.at(-1)!.distance
-  const polyimidePath = trimPath(
+  const coverlayPath = trimPath(
     path,
     resolved.options.exposedContactLength,
     resolved.options.exposedContactLength,
   )
-  const polyimideFrames = createCableFrames(polyimidePath, resolved.options.up)
+  const coverlayFrames = createCableFrames(coverlayPath, resolved.options.up)
   const width =
     (definition.wireCount - 1) * definition.pitch +
     resolved.options.conductorWidth +
     resolved.options.edgeMargin * 2
 
-  const polyimide = createSweptSolid(
-    polyimideFrames,
+  const dielectricThickness =
+    resolved.options.polyimideThickness - resolved.options.copperThickness
+  const substrateThickness = dielectricThickness * 0.6
+  const coverlayThickness = dielectricThickness - substrateThickness
+  const substrateNormalOffset =
+    -resolved.options.polyimideThickness / 2 + substrateThickness / 2
+  const copperNormalOffset =
+    -resolved.options.polyimideThickness / 2 +
+    substrateThickness +
+    resolved.options.copperThickness / 2
+  const coverlayNormalOffset =
+    resolved.options.polyimideThickness / 2 - coverlayThickness / 2
+
+  const substrate = createSweptSolid(
+    frames,
     width,
-    resolved.options.polyimideThickness,
+    substrateThickness,
     0,
+    substrateNormalOffset,
+    Math.max(definition.pitch * 3, 1),
+  )
+  const coverlay = createSweptSolid(
+    coverlayFrames,
+    width,
+    coverlayThickness,
+    0,
+    coverlayNormalOffset,
     Math.max(definition.pitch * 3, 1),
   )
   const conductors = Array.from(
@@ -60,6 +85,7 @@ export const createFpcCableGeometry = (
         resolved.options.conductorWidth,
         resolved.options.copperThickness,
         acrossOffset,
+        copperNormalOffset,
         Math.max(definition.pitch * 2, 0.5),
       )
     },
@@ -67,7 +93,8 @@ export const createFpcCableGeometry = (
 
   return {
     path,
-    polyimide,
+    substrate,
+    coverlay,
     conductors,
     dimensions: {
       width,

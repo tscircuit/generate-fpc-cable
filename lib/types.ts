@@ -22,7 +22,7 @@ export interface FpcCableDefinition {
 }
 
 export interface FpcCableOptions {
-  /** Overall polyimide thickness. Defaults to 0.18. */
+  /** Overall substrate/copper/coverlay stack thickness. Defaults to 0.18. */
   polyimideThickness?: number
   /** Copper conductor thickness. Defaults to 0.035. */
   copperThickness?: number
@@ -57,7 +57,7 @@ export interface FpcCableDimensions {
 }
 
 export interface FpcCableManifoldModel {
-  /** Polyimide cover, trimmed back at both contact ends. */
+  /** Full substrate and retracted top coverlay, represented as one manifold. */
   polyimide: Manifold
   /** One solid for each copper conductor, ordered across the cable. */
   conductors: Manifold[]

@@ -9,8 +9,9 @@ Generate smooth, routed FPC/ribbon cable geometry as:
 The centerline passes through the supplied start, navpoints, and end. A
 parallel-transport frame keeps the ribbon orientation stable as it bends in
 three dimensions. The rendered asset contains a translucent amber polyimide
-cover, a subtle procedural weave texture, individual brushed-copper conductors
-inside the cover, and uncovered contacts at both ends.
+substrate and coverlay, a subtle procedural weave texture, individual
+brushed-copper conductors, and exposed contact pads supported by the continuous
+substrate at both ends.
 
 ![Eight-wire routed FPC](tests/visual/__snapshots__/ribbon-cable-eight-wire-arched.snap.png)
 
@@ -69,8 +70,8 @@ console.log(gltf.dimensions)
 
 ## Generate manifold-3d solids
 
-The manifold result retains the cover and each conductor separately for
-multi-material or CAD workflows. `combined` is their boolean union. Call
+The manifold result retains the polyimide layers and each conductor separately
+for multi-material or CAD workflows. `combined` is their boolean union. Call
 `dispose()` when finished to release the owned WASM objects.
 
 ```ts
