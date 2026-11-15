@@ -44,6 +44,21 @@ describe("ribbon cable geometry", () => {
     )
   })
 
+  test("out-and-back cables generate geometry instead of throwing", () => {
+    const geometry = createFpcCableGeometry({
+      start: [0, 0, 0],
+      navPoints: [[10, 0, 0]],
+      end: [0, 0, 0],
+      wireCount: 4,
+      pitch: 1,
+    })
+
+    expect(geometry.path.length).toBeGreaterThan(2)
+    expect(geometry.conductors).toHaveLength(4)
+    expect(geometry.substrate.compact.indices.length).toBeGreaterThan(0)
+    expect(geometry.coverlay.compact.indices.length).toBeGreaterThan(0)
+  })
+
   test("rejects invalid cable definitions", () => {
     expect(() =>
       createFpcCableGeometry({

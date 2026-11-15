@@ -170,15 +170,45 @@ const chooseAcross = (tangent: Point3D, preferredUp: Point3D): Point3D => {
   return normalize(across)
 }
 
+const tangentBetween = (from: Point3D, to: Point3D): Point3D | undefined => {
+  const delta = subtract(to, from)
+  return length(delta) < 1e-12 ? undefined : normalize(delta)
+}
+
+/** Polyline tangent that stays defined at a 180° reversal (out-and-back cables). */
+const tangentAtPathIndex = (
+  path: readonly Point3D[],
+  index: number,
+): Point3D => {
+  const current = path[index]!
+  const before = path[Math.max(0, index - 1)]!
+  const after = path[Math.min(path.length - 1, index + 1)]!
+  const spanned = tangentBetween(before, after)
+  if (spanned) return spanned
+  const outgoing = tangentBetween(current, after)
+  if (outgoing) return outgoing
+  const incoming = tangentBetween(before, current)
+  if (incoming) return incoming
+  for (let look = 1; look < path.length; look += 1) {
+    const next = path[index + look]
+    if (next) {
+      const outgoingLook = tangentBetween(current, next)
+      if (outgoingLook) return outgoingLook
+    }
+    const prev = path[index - look]
+    if (prev) {
+      const incomingLook = tangentBetween(prev, current)
+      if (incomingLook) return incomingLook
+    }
+  }
+  return { x: 1, y: 0, z: 0 }
+}
+
 export const createCableFrames = (
   path: readonly Point3D[],
   preferredUp: Point3D,
 ): CableFrame[] => {
-  const tangents = path.map((current, index) => {
-    const before = path[Math.max(0, index - 1)]!
-    const after = path[Math.min(path.length - 1, index + 1)]!
-    return normalize(subtract(after, before))
-  })
+  const tangents = path.map((_, index) => tangentAtPathIndex(path, index))
   const frames: CableFrame[] = []
   let cumulativeDistance = 0
   let previousAcross = chooseAcross(tangents[0]!, preferredUp)
